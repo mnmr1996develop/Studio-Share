@@ -1,9 +1,6 @@
 package com.michaelrichards.user_service.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Builder
@@ -15,6 +12,7 @@ import lombok.*;
 public class PrivacySetting {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long privacyId;
 
     @OneToOne(orphanRemoval = true)

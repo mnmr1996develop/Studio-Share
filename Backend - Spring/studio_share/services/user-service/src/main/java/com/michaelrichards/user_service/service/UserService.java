@@ -39,6 +39,7 @@ public class UserService {
         User user = User.builder()
                 .firstName(registrationRequest.getFirstName())
                 .lastName(registrationRequest.getLastName())
+                .username(registrationRequest.getUsername())
                 .birthday(registrationRequest.getBirthday())
                 .email(registrationRequest.getEmail())
                 .password(registrationRequest.getPassword())
@@ -46,6 +47,8 @@ public class UserService {
                 .lastUpdated(LocalDateTime.now())
                 .privacySetting(privacySetting)
                 .build();
+
+        privacySetting.setUser(user);
 
         privacyRepository.save(privacySetting);
         User savedUser = userRepository.save(user);
@@ -57,6 +60,7 @@ public class UserService {
     private UserDataResponse mapUserToUserDataResponse(User user) {
         PrivacySettingsDTO privacySetting = PrivacySettingsDTO.builder()
                 .isAccountPrivate(user.getPrivacySetting().getIsAccountPrivate())
+
                 .build();
 
         return UserDataResponse.builder()
