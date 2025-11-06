@@ -1,0 +1,5 @@
+CREATE DATABASE follow_relations;
+
+CREATE DATABASE chats;
+
+CREATE DATABASE m_users
