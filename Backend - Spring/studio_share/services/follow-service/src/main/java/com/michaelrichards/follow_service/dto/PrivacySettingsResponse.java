@@ -1,10 +1,10 @@
-package com.michaelrichards.user_service.dto;
+package com.michaelrichards.follow_service.dto;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class PrivacySettingsResponse {
     private boolean isAccountPrivate;
 }

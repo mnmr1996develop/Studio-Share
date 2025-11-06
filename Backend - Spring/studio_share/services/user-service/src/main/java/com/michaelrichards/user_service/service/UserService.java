@@ -1,21 +1,23 @@
 package com.michaelrichards.user_service.service;
 
-import com.michaelrichards.user_service.dto.PrivacySettingsDTO;
+import com.michaelrichards.user_service.dto.PrivacySettingsResponse;
 import com.michaelrichards.user_service.dto.RegistrationRequest;
 import com.michaelrichards.user_service.dto.UserDataResponse;
 import com.michaelrichards.user_service.model.PrivacySetting;
 import com.michaelrichards.user_service.model.User;
 import com.michaelrichards.user_service.repository.PrivacyRepository;
 import com.michaelrichards.user_service.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
+@Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -24,11 +26,10 @@ public class UserService {
 
     private final PrivacyRepository privacyRepository;
 
+    @Transactional
     public UserDataResponse registerUser(RegistrationRequest registrationRequest) {
 
-        PrivacySetting privacySetting = PrivacySetting.builder()
-                .isAccountPrivate(registrationRequest.getIsAccountPrivate())
-                .build();
+        PrivacySetting privacySetting = PrivacySetting.builder().isAccountPrivate(registrationRequest.getIsAccountPrivate()).build();
 
         if (userRepository.existsByEmailIgnoreCase(registrationRequest.getEmail()))
             throw new RuntimeException("Email already exist");
@@ -40,6 +41,7 @@ public class UserService {
                 .firstName(registrationRequest.getFirstName())
                 .lastName(registrationRequest.getLastName())
                 .username(registrationRequest.getUsername())
+                .avatarURI(registrationRequest.getAvatarURI())
                 .birthday(registrationRequest.getBirthday())
                 .email(registrationRequest.getEmail())
                 .password(registrationRequest.getPassword())
@@ -53,25 +55,18 @@ public class UserService {
         privacyRepository.save(privacySetting);
         User savedUser = userRepository.save(user);
 
+        log.info("User {} is saved with username {}", savedUser.getUserId(), savedUser.getUsername());
+
         return mapUserToUserDataResponse(savedUser);
     }
 
 
     private UserDataResponse mapUserToUserDataResponse(User user) {
-        PrivacySettingsDTO privacySetting = PrivacySettingsDTO.builder()
-                .isAccountPrivate(user.getPrivacySetting().getIsAccountPrivate())
+        PrivacySettingsResponse privacySetting = PrivacySettingsResponse.builder().isAccountPrivate(user.getPrivacySetting().getIsAccountPrivate())
 
                 .build();
 
-        return UserDataResponse.builder()
-                .userId(user.getUserId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .age(user.getAge())
-                .userPrivacySettings(privacySetting)
-                .username(user.getUsername())
-                .createdAt(user.getCreatedAt())
-                .build();
+        return UserDataResponse.builder().userId(user.getUserId()).firstName(user.getFirstName()).lastName(user.getLastName()).age(user.getAge()).userPrivacySettings(privacySetting).username(user.getUsername()).createdAt(user.getCreatedAt()).build();
     }
 
     public List<UserDataResponse> getAllUsers() {
@@ -81,6 +76,11 @@ public class UserService {
     //Todo: replace generic runtime exception with something more informative
     public UserDataResponse findByUsername(String username) {
         User user = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new RuntimeException(""));
+        return mapUserToUserDataResponse(user);
+    }
+
+    public UserDataResponse findById(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
         return mapUserToUserDataResponse(user);
     }
 }

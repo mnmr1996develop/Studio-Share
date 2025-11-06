@@ -65,6 +65,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column
+    private String avatarURI;
+
     @NotNull
     @Column(nullable = false)
     @Past(message = "Invalid Birthday")

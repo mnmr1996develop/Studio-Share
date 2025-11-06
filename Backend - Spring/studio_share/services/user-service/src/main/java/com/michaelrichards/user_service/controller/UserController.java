@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,9 +23,9 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping("{username}")
-    public ResponseEntity<UserDataResponse> findByUsername(@PathVariable("username") String username){
-        return ResponseEntity.ok(userService.findByUsername(username));
+    @GetMapping("{userId}")
+    public ResponseEntity<UserDataResponse> findByUsername(@PathVariable("userId") UUID userId){
+        return ResponseEntity.ok(userService.findById(userId));
     }
 
     @PostMapping
