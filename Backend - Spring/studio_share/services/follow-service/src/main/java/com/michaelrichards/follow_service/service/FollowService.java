@@ -1,19 +1,20 @@
 package com.michaelrichards.follow_service.service;
 
-import com.michaelrichards.follow_service.dto.FollowResponse;
+import com.michaelrichards.follow_service.dto.FollowedUserResponse;
 import com.michaelrichards.follow_service.dto.UserDataResponse;
 import com.michaelrichards.follow_service.model.FollowerRelationship;
 import com.michaelrichards.follow_service.model.User;
 import com.michaelrichards.follow_service.repository.FollowRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 @Slf4j
@@ -23,33 +24,27 @@ public class FollowService {
 
     private final FollowRepository followRepository;
 
-    private final WebClient webClient;
+    private final UserMapper userMapper;
+
+    private final FollowMapper followMapper;
 
     private final UserService userService;
 
-    private final String USER_SERVICE_BASE_URL = "http://localhost:8081/api/v1/users/";
+    private final static String USERNAME = "username";
+
+    private final static String TIME_FOLLOWED = "timeFollowed";
 
 
     @Transactional
-    public FollowResponse followUser(UUID followerId, UUID followingId) {
+    public FollowedUserResponse followUser(UUID followerId, UUID followingId) {
 
         if (followerId.equals(followingId)) {
             throw new IllegalArgumentException("Cannot follow yourself");
         }
 
-        UserDataResponse followerResponse = webClient.get()
-                .uri(USER_SERVICE_BASE_URL + followerId)
-                .retrieve()
-                .bodyToMono(UserDataResponse.class)
-                .block();
+        UserDataResponse followerResponse = userMapper.toUserDataResponse(followerId);
 
-
-
-        UserDataResponse followingResponse = webClient.get()
-                .uri(USER_SERVICE_BASE_URL + followingId)
-                .retrieve()
-                .bodyToMono(UserDataResponse.class)
-                .block();
+        UserDataResponse followingResponse = userMapper.toUserDataResponse(followerId);
 
 
         if (followingResponse == null || followerResponse == null) {
@@ -75,11 +70,11 @@ public class FollowService {
                 .build();
 
         FollowerRelationship savedRelationship = followRepository.save(relationship);
-        return convertToResponse(savedRelationship);
+        return followMapper.toFollowedUserResponse(savedRelationship);
     }
 
     @Transactional
-    public void unfollowUser(UUID followerId, UUID followingId) {
+    public Boolean unfollowUser(UUID followerId, UUID followingId) {
         User follower = userService.getUserEntity(followerId)
                 .orElseThrow(() -> new RuntimeException("Follower user not found"));
 
@@ -87,33 +82,40 @@ public class FollowService {
                 .orElseThrow(() -> new RuntimeException("Following user not found"));
 
         followRepository.deleteByFollowerAndFollowing(follower, following);
+
+        return true;
     }
 
     public List<UserDataResponse> getFollowers(UUID userId, int pageNumber) {
-        return null;
+        int pageSize = 20;
+        Pageable pageable = PageRequest.of(
+                pageNumber,
+                pageSize,
+                Sort.by(TIME_FOLLOWED)
+                        .ascending()
+                        .and(Sort.by(USERNAME)
+                                .ascending()
+                        )
+        );
+
+        List<FollowerRelationship> followerRelationships = followRepository.findFollowersByUserId(userId, pageable);
+
+
+
+        List<UUID > uuidsList =followerRelationships.stream().map(
+                followerRelationship ->
+                        followerRelationship.getFollower().getUserId()
+        ).toList();
+
+
+        return userMapper.toListOfDataResponse(uuidsList);
     }
 
-    private FollowResponse convertToResponse(FollowerRelationship relationship) {
-        UserDataResponse followerDTO = convertUserToDTO(relationship.getFollower());
-        UserDataResponse followingDTO = convertUserToDTO(relationship.getFollowing());
 
-        return FollowResponse.builder()
-                .relationshipId(relationship.getFollowRelationId())
-                .follower(followerDTO)
-                .following(followingDTO)
-                .timeFollowed(relationship.getTimeFollowed())
-                .build();
-    }
 
-    private UserDataResponse convertUserToDTO(User user) {
-        UserDataResponse followingResponse = webClient.get()
-                .uri(USER_SERVICE_BASE_URL + user.getUserId())
-                .retrieve()
-                .bodyToMono(UserDataResponse.class)
-                .block();
-        if (followingResponse == null) throw new RuntimeException("Invalid");
 
-        return followingResponse;
-    }
+
+
+
 
 }

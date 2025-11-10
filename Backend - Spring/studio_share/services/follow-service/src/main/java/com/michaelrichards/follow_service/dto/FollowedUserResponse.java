@@ -8,8 +8,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class FollowResponse {
-
+public class FollowedUserResponse {
     private UUID relationshipId;
     private UserDataResponse follower;
     private UserDataResponse following;

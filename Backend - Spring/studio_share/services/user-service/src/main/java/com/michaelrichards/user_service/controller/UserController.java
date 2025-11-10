@@ -2,6 +2,7 @@ package com.michaelrichards.user_service.controller;
 
 import com.michaelrichards.user_service.dto.RegistrationRequest;
 import com.michaelrichards.user_service.dto.UserDataResponse;
+import com.michaelrichards.user_service.dto.UserList;
 import com.michaelrichards.user_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,14 +19,15 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping
-    public ResponseEntity<List<UserDataResponse>> getAllUsers(){
-        return ResponseEntity.ok(userService.getAllUsers());
-    }
 
     @GetMapping("{userId}")
     public ResponseEntity<UserDataResponse> findByUsername(@PathVariable("userId") UUID userId){
         return ResponseEntity.ok(userService.findById(userId));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserDataResponse>> getListOfUsersByUserId(@RequestParam("userIds") List<UUID> uuids){
+        return ResponseEntity.ok().body(userService.findByUserIdIn(uuids));
     }
 
     @PostMapping

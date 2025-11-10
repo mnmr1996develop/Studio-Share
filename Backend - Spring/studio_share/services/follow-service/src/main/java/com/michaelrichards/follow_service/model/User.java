@@ -21,6 +21,8 @@ public class User {
 
     private Boolean isAccountPrivate;
 
+    private String username;
+
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<FollowerRelationship> followers = new LinkedHashSet<>();
 

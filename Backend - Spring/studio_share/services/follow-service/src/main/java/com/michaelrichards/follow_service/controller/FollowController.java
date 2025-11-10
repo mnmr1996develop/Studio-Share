@@ -1,16 +1,14 @@
 package com.michaelrichards.follow_service.controller;
 
-import com.michaelrichards.follow_service.dto.FollowResponse;
+import com.michaelrichards.follow_service.dto.FollowedUserResponse;
+import com.michaelrichards.follow_service.dto.UserDataResponse;
 import com.michaelrichards.follow_service.service.FollowService;
-import jakarta.ws.rs.GET;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,9 +20,18 @@ public class FollowController {
     private final FollowService followService;
 
     @PostMapping
-    public ResponseEntity<FollowResponse> followUser(@RequestParam("followerId") UUID followerId, @RequestParam("followingId") UUID followingId) {
-
+    public ResponseEntity<FollowedUserResponse> followUser(@RequestParam("followerId") UUID followerId, @RequestParam("followingId") UUID followingId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(followService.followUser(followerId, followingId));
     }
+
+    @PostMapping ResponseEntity<Boolean> unfollowUser(@RequestParam("followerId") UUID followerId, @RequestParam("followingId") UUID followingId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(followService.unfollowUser(followerId, followingId));
+    }
+    @GetMapping
+    public ResponseEntity<List<UserDataResponse>> getFollowersPaged(@RequestParam("userId") UUID userId, int pageNumber){
+        return ResponseEntity.ok().body(followService.getFollowers(userId, pageNumber));
+    }
+
+
 
 }
