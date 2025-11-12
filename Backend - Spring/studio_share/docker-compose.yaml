@@ -35,6 +35,39 @@ services:
       - "5050:80"
     networks:
       - studio_share_network
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.2
+    container_name: studio_share_keycloak
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/studio_share
+      KC_DB_USERNAME: mnmr1996development
+      KC_DB_PASSWORD: mnmr1996development
+
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false      
+    
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    
+      KC_IMPORT: /opt/keycloak/data/import/my-realm.json
+    volumes:
+      - ./keycloak-data:/opt/keycloak/data/import
+    ports:
+      - "7080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - studio_share_network
 
 
 

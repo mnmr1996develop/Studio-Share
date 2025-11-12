@@ -8,6 +8,11 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:7080/realms/studio_share
   cloud:
     gateway:
       discovery:
