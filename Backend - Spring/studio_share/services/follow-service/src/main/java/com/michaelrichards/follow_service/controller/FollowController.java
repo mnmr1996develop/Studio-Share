@@ -13,20 +13,22 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/follow")
+@RequestMapping("api/v1/followers/")
 public class FollowController {
 
 
     private final FollowService followService;
 
-    @PostMapping
+    @PostMapping("follow")
     public ResponseEntity<FollowedUserResponse> followUser(@RequestParam("followerId") UUID followerId, @RequestParam("followingId") UUID followingId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(followService.followUser(followerId, followingId));
     }
 
-    @PostMapping ResponseEntity<Boolean> unfollowUser(@RequestParam("followerId") UUID followerId, @RequestParam("followingId") UUID followingId) {
+    @PostMapping("unfollow")
+    ResponseEntity<Boolean> unfollowUser(@RequestParam("followerId") UUID followerId, @RequestParam("followingId") UUID followingId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(followService.unfollowUser(followerId, followingId));
     }
+
     @GetMapping
     public ResponseEntity<List<UserDataResponse>> getFollowersPaged(@RequestParam("userId") UUID userId, int pageNumber){
         return ResponseEntity.ok().body(followService.getFollowers(userId, pageNumber));

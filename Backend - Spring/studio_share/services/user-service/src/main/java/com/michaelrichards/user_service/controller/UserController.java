@@ -2,7 +2,6 @@ package com.michaelrichards.user_service.controller;
 
 import com.michaelrichards.user_service.dto.RegistrationRequest;
 import com.michaelrichards.user_service.dto.UserDataResponse;
-import com.michaelrichards.user_service.dto.UserList;
 import com.michaelrichards.user_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/users")
+@RequestMapping("api/v1/users/")
 public class UserController {
 
     private final UserService userService;

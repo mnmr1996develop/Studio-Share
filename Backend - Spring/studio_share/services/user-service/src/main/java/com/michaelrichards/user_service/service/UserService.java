@@ -3,7 +3,6 @@ package com.michaelrichards.user_service.service;
 import com.michaelrichards.user_service.dto.PrivacySettingsResponse;
 import com.michaelrichards.user_service.dto.RegistrationRequest;
 import com.michaelrichards.user_service.dto.UserDataResponse;
-import com.michaelrichards.user_service.dto.UserList;
 import com.michaelrichards.user_service.model.PrivacySetting;
 import com.michaelrichards.user_service.model.User;
 import com.michaelrichards.user_service.repository.PrivacyRepository;
